@@ -11,7 +11,30 @@ import expenseRoutes from './routes/expenseRoutes.js';
 dotenv.config();
 const app = express();
 
-app.use(cors({ origin: process.env.FRONTEND_ORIGIN || 'http://localhost:5173' }));
+const configuredOrigins = [process.env.FRONTEND_ORIGIN, process.env.FRONTEND_ORIGINS]
+	.filter(Boolean)
+	.flatMap((value) => value.split(','))
+	.map((value) => value.trim())
+	.filter(Boolean);
+
+const isAllowedLocalhost = (origin) => /^http:\/\/localhost:\d+$/.test(origin);
+
+app.use(
+	cors({
+		origin(origin, callback) {
+			// Allow server-to-server and non-browser requests (no Origin header).
+			if (!origin) return callback(null, true);
+
+			if (configuredOrigins.includes(origin) || isAllowedLocalhost(origin)) {
+				return callback(null, true);
+			}
+
+			return callback(new Error('Not allowed by CORS'));
+		},
+		methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+		allowedHeaders: ['Content-Type', 'Authorization'],
+	})
+);
 app.use(express.json());
 
 const __filename = fileURLToPath(import.meta.url);

@@ -22,6 +22,18 @@ body {
     #f5f6fb;
 }
 
+:root[data-theme="dark"] {
+  color: #e2e8f0;
+  background-color: #020617;
+}
+
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at 10% 15%, rgba(37, 99, 235, 0.18), transparent 25%),
+    radial-gradient(circle at 90% 10%, rgba(20, 184, 166, 0.16), transparent 24%),
+    linear-gradient(180deg, #020617, #0f172a 60%, #111827);
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -43,6 +55,19 @@ button {
 button:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid #0f766e;
+  outline-offset: 2px;
+}
+
+:root[data-theme="dark"] button:focus-visible,
+:root[data-theme="dark"] a:focus-visible,
+:root[data-theme="dark"] input:focus-visible {
+  outline-color: #60a5fa;
 }
 
 button:disabled {

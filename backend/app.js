@@ -1,5 +1,5 @@
 import express from 'express';
-import mongoose from 'mongoose';
+import { connectDB } from './config/db.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -37,8 +37,12 @@ app.get('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    app.listen(PORT, () => console.log(`🚀 Server running on ${PORT}`));
-  })
-  .catch(err => console.error("❌ DB Connection Error:", err));
+function startServer() {
+	app.listen(PORT, () => console.log(`🚀 Server running on ${PORT}`));
+}
+
+// Attempt to connect to the database, but always start the server (fallback for local dev)
+connectDB().then((ok) => {
+	if (!ok) console.warn('⚠️ Starting server without DB connection (fallback for local dev)');
+	startServer();
+});

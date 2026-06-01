@@ -23,8 +23,22 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-card">
-      <h2>Login</h2>
+    <div className="auth-card auth-split">
+      <div className="auth-copy">
+        <span className="metric-icon auth-icon" aria-hidden="true">
+          ⇢
+        </span>
+        <p className="eyebrow">Welcome back</p>
+        <h2>Login</h2>
+        <p className="muted">
+          Pick up where you left off and review your spending in seconds.
+        </p>
+        <div className="auth-features">
+          <span>Secure sign in</span>
+          <span>Saved theme</span>
+          <span>Live analytics</span>
+        </div>
+      </div>
       <form onSubmit={handleSubmit}>
         <label>
           Email
@@ -46,7 +60,7 @@ const Login = () => {
             required
           />
         </label>
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading} className="button-primary">
           {loading ? "Signing in…" : "Login"}
         </button>
         {error && <p className="error">{error}</p>}

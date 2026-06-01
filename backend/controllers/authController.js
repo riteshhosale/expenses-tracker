@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 
 const isEmail = (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val || '');
 
@@ -13,14 +14,31 @@ export const register = async (req, res) => {
     const limitVal = Number(monthlyLimit ?? 0);
     if (Number.isNaN(limitVal) || limitVal < 0) return res.status(400).json({ message: 'monthlyLimit must be non-negative' });
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: 'User already exists' });
+    const dbConnected = mongoose.connection && mongoose.connection.readyState === 1;
+    if (dbConnected) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) return res.status(400).json({ message: 'User already exists' });
 
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = new User({ name, email, password: hashedPassword, monthlyLimit: limitVal });
+      await newUser.save();
+
+      return res.status(201).json({ message: 'User created successfully' });
+    }
+
+    // In-memory fallback
+    if (!global.__memUsers) global.__memUsers = new Map();
+    if (global.__memUsers.has(email)) return res.status(400).json({ message: 'User already exists' });
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password: hashedPassword, monthlyLimit: limitVal });
-    await newUser.save();
-
-    res.status(201).json({ message: 'User created successfully' });
+    const newUser = {
+      _id: String(Date.now()) + Math.random().toString(36).slice(2,8),
+      name,
+      email,
+      password: hashedPassword,
+      monthlyLimit: limitVal
+    };
+    global.__memUsers.set(email, newUser);
+    return res.status(201).json({ message: 'User created successfully (in-memory)' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -31,16 +49,26 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ message: 'Email and password are required' });
     if (!isEmail(email)) return res.status(400).json({ message: 'Invalid email' });
+    const dbConnected = mongoose.connection && mongoose.connection.readyState === 1;
+    if (dbConnected) {
+      const user = await User.findOne({ email });
+      if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    const isMatch = await bcrypt.compare(password, user.password);
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+      return res.json({ token, user: { id: user._id, name: user.name, email: user.email, monthlyLimit: user.monthlyLimit } });
+    }
+
+    // In-memory fallback
+    const memUser = global.__memUsers && global.__memUsers.get(email);
+    if (!memUser) return res.status(400).json({ message: 'Invalid credentials' });
+    const isMatch = await bcrypt.compare(password, memUser.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, monthlyLimit: user.monthlyLimit } });
+    const token = jwt.sign({ id: memUser._id }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '7d' });
+    return res.json({ token, user: { id: memUser._id, name: memUser.name, email: memUser.email, monthlyLimit: memUser.monthlyLimit } });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -28,8 +28,22 @@ const Register = () => {
   };
 
   return (
-    <div className="auth-card">
-      <h2>Create account</h2>
+    <div className="auth-card auth-split">
+      <div className="auth-copy">
+        <span className="metric-icon auth-icon" aria-hidden="true">
+          ✦
+        </span>
+        <p className="eyebrow">Get started</p>
+        <h2>Create account</h2>
+        <p className="muted">
+          Set a monthly limit and begin tracking every expense with context.
+        </p>
+        <div className="auth-features">
+          <span>Budget limit</span>
+          <span>Category tags</span>
+          <span>Export CSV</span>
+        </div>
+      </div>
       <form onSubmit={handleSubmit}>
         <label>
           Name
@@ -71,7 +85,7 @@ const Register = () => {
             required
           />
         </label>
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading} className="button-primary">
           {loading ? "Registering…" : "Register"}
         </button>
         {error && <p className="error">{error}</p>}

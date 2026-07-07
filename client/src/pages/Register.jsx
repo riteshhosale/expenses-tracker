@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useAuth } from "../context/useAuth.js";
 
 const Register = () => {
   const { register, loading, error } = useAuth();
@@ -22,7 +22,7 @@ const Register = () => {
     try {
       await register({ ...form, monthlyLimit: Number(form.monthlyLimit) });
       navigate("/");
-    } catch (err) {
+    } catch {
       // error is shown via context error state
     }
   };

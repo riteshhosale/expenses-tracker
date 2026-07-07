@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
-
+import { useAuth } from "../context/useAuth.js";
 const Login = () => {
   const { login, loading, error } = useAuth();
   const navigate = useNavigate();
@@ -17,8 +16,8 @@ const Login = () => {
     try {
       await login(form);
       navigate("/");
-    } catch (err) {
-      // error already captured in context
+    } catch (error) {
+      console.error("Login error:", error);
     }
   };
 

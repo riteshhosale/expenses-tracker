@@ -4,7 +4,7 @@ import "./App.css";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
-import { useAuth } from "./context/AuthContext.jsx";
+import { useAuth } from "./context/useAuth.js";
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();

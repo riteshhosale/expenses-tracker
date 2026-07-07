@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useAuth } from "../context/useAuth.js";
 import { formatINR } from "../utils/currency.js";
 import { API_BASE } from "../utils/api.js";
 

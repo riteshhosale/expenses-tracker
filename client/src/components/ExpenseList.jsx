@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAuth } from "../context/useAuth.js";
 import { formatINR } from "../utils/currency.js";
 import { API_BASE } from "../utils/api.js";
 import { DEFAULT_CATEGORIES } from "../utils/categories.js";
@@ -17,7 +17,7 @@ const ExpenseList = ({ refreshToken }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchExpenses = async () => {
+  const fetchExpenses = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -32,11 +32,11 @@ const ExpenseList = ({ refreshToken }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     fetchExpenses();
-  }, [refreshToken]);
+  }, [fetchExpenses, refreshToken]);
 
   const categories = useMemo(() => {
     const unique = new Set(

@@ -7,3 +7,4 @@ const fallbackApiBase = import.meta.env.DEV
 	: window.location.origin;
 
 export const API_BASE = (envApiBase || fallbackApiBase).replace(/\/$/, "");
+	

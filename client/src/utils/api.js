@@ -4,7 +4,7 @@ const envApiBase = import.meta.env.VITE_API_BASE?.trim();
 // For split deployments (frontend/backend on different domains), set VITE_API_BASE explicitly.
 const fallbackApiBase = import.meta.env.DEV
 	? "http://localhost:5000"
-	: window.location.origin;
+	: "https://expenses-tracker-ickn.onrender.com";
 
 export const API_BASE = (envApiBase || fallbackApiBase).replace(/\/$/, "");
 	

@@ -75,8 +75,20 @@ app.get("*", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-function startServer() {
-  app.listen(PORT, () => console.log(`🚀 Server running on ${PORT}`));
+function startServer(port = Number(PORT), retries = 5) {
+  const server = app.listen(port, () =>
+    console.log(`🚀 Server running on ${port}`),
+  );
+  server.on("error", (error) => {
+    if (error.code === "EADDRINUSE" && retries > 0) {
+      const nextPort = port + 1;
+      console.warn(`⚠️ Port ${port} is already in use. Trying ${nextPort}...`);
+      startServer(nextPort, retries - 1);
+      return;
+    }
+
+    throw error;
+  });
 }
 
 // Attempt to connect to the database, but always start the server (fallback for local dev)

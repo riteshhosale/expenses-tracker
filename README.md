@@ -153,6 +153,8 @@ Set these environment variables in production:
   FRONTEND_ORIGINS=https://your-frontend-domain.com,https://www.your-frontend-domain.com
   ```
 
+  If you deploy the frontend on Vercel, either add the deployed Vercel URL here or set `FRONTEND_ORIGINS` to include your preview and production Vercel domains.
+
 - Frontend (`client/.env.production` or hosting provider env):
   ```env
   VITE_API_BASE=https://your-backend-domain.com

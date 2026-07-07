@@ -23,6 +23,8 @@ const configuredOrigins = [
 const isAllowedLocalhost = (origin) => /^http:\/\/localhost:\d+$/.test(origin);
 const isAllowedRenderOrigin = (origin) =>
   /^https:\/\/[a-z0-9-]+\.onrender\.com$/i.test(origin);
+const isAllowedVercelOrigin = (origin) =>
+  /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin);
 
 app.use(
   cors({
@@ -35,6 +37,10 @@ app.use(
       }
 
       if (isAllowedRenderOrigin(origin)) {
+        return callback(null, true);
+      }
+
+      if (isAllowedVercelOrigin(origin)) {
         return callback(null, true);
       }
 

@@ -1,14 +1,12 @@
 import express from "express";
+import "./config/env.js";
 import { connectDB } from "./config/db.js";
 import cors from "cors";
-import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
-
-dotenv.config();
 const app = express();
 
 const configuredOrigins = [

@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
 const app = express();
+const isVercel = process.env.VERCEL === "1" || process.env.VERCEL === "true";
 
 const configuredOrigins = [
   process.env.FRONTEND_ORIGIN,
@@ -53,23 +54,25 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve frontend if built
+// Serve frontend only in local/server deployments; Vercel serves the built client separately.
 const distPath = path.join(__dirname, "../client/dist");
-if (fs.existsSync(path.join(distPath, "index.html"))) {
+if (!isVercel && fs.existsSync(path.join(distPath, "index.html"))) {
   app.use(express.static(distPath));
 }
 
 app.use("/api/auth", authRoutes);
 app.use("/api/expenses", expenseRoutes);
 
-// SPA fallback
-app.get("*", (req, res) => {
-  if (fs.existsSync(path.join(distPath, "index.html"))) {
-    res.sendFile(path.join(distPath, "index.html"));
-  } else {
-    res.status(404).json({ message: "Frontend not built" });
-  }
-});
+// SPA fallback for local/standalone server use only.
+if (!isVercel) {
+  app.get("*", (req, res) => {
+    if (fs.existsSync(path.join(distPath, "index.html"))) {
+      res.sendFile(path.join(distPath, "index.html"));
+    } else {
+      res.status(404).json({ message: "Frontend not built" });
+    }
+  });
+}
 
 const PORT = process.env.PORT || 5000;
 
@@ -95,5 +98,10 @@ connectDB().then((ok) => {
     console.warn(
       "⚠️ Starting server without DB connection (fallback for local dev)",
     );
-  startServer();
+
+  if (!isVercel) {
+    startServer();
+  }
 });
+
+export default app;

@@ -2,32 +2,50 @@ import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext.js";
 import { API_BASE } from "../utils/api.js";
 
+const readAuthValue = (key) => {
+  try {
+    return window.sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const writeAuthValue = (key, value) => {
+  try {
+    if (value === null) {
+      window.sessionStorage.removeItem(key);
+    } else {
+      window.sessionStorage.setItem(key, value);
+    }
+  } catch {
+    // Ignore storage errors so login still works in restricted browsers.
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem("user");
+    const stored = readAuthValue("user");
     return stored ? JSON.parse(stored) : null;
   });
 
-  const [token, setToken] = useState(() =>
-    localStorage.getItem("token")
-  );
+  const [token, setToken] = useState(() => readAuthValue("token"));
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem("user", JSON.stringify(user));
+      writeAuthValue("user", JSON.stringify(user));
     } else {
-      localStorage.removeItem("user");
+      writeAuthValue("user", null);
     }
   }, [user]);
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem("token", token);
+      writeAuthValue("token", token);
     } else {
-      localStorage.removeItem("token");
+      writeAuthValue("token", null);
     }
   }, [token]);
 
@@ -65,6 +83,9 @@ export const AuthProvider = ({ children }) => {
   const login = async ({ email, password }) => {
     setLoading(true);
     setError(null);
+
+    setUser(null);
+    setToken(null);
 
     try {
       const res = await fetch(`${API_BASE}/api/auth/login`, {
